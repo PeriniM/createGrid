@@ -56,6 +56,7 @@ function mouseWheel(event) {
       array_shapes[array_shapes.length-1].virtual=false;
     }
     if (griglia.suddx==griglia.maxSuddx || griglia.suddx==griglia.minSuddx){
+      cursor.snap(mouseX, mouseY, griglia.lineY, griglia.lineX);
       cursor.show('#1abc9c', griglia.sideLength/4);
     }
     if (new_shape == true){
