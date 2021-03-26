@@ -5,6 +5,8 @@ let cursor;
 let array_shapes = [];
 let bg_color = 255;
 let new_shape = false;
+let indxMax = 0;
+let indyMax = 0;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -44,29 +46,6 @@ function mouseMoved(){
   }
 }
 
-function mouseWheel(event) {
-  if (mouseInside()==true){
-    background(bg_color);
-    griglia.zoom(event.delta);
-    griglia.show(150,0.5);
-    if (array_shapes.length!=0){
-      for(let i = 0; i<array_shapes.length; i++){
-        array_shapes[i].show(griglia.lineX, griglia.lineY);
-      }
-      array_shapes[array_shapes.length-1].virtual=false;
-    }
-    if (griglia.suddx==griglia.maxSuddx || griglia.suddx==griglia.minSuddx){
-      cursor.snap(mouseX, mouseY, griglia.lineY, griglia.lineX);
-      cursor.show('#1abc9c', griglia.sideLength/4);
-    }
-    if (new_shape == true){
-      array_shapes[array_shapes.length-1].createVirtual(cursor.getInd());
-    }
-    
-  }
-  return false;  //block page scrolling
-}
-
 function mousePressed(){
   if (mouseButton === LEFT && mouseInside()==true) {
     refreshCanvas('#16a085');
@@ -74,6 +53,8 @@ function mousePressed(){
       array_shapes.push(new CustomShape(0,random(100,255),random(100,255),100));
       array_shapes[array_shapes.length-1].create(cursor.getInd());
       new_shape = true;
+      indxMax = indxMax < cursor.getInd()[0] ? cursor.getInd()[0] : indxMax; 
+      indyMax = indyMax < cursor.getInd()[1] ? cursor.getInd()[1] : indyMax;
     }
     else {
       if (array_shapes[array_shapes.length-1].indicesX[0] == cursor.indX && array_shapes[array_shapes.length-1].indicesY[0] == cursor.indY){
@@ -83,6 +64,8 @@ function mousePressed(){
       }
       else{
         array_shapes[array_shapes.length-1].create(cursor.getInd());
+        indxMax = indxMax < cursor.getInd()[0] ? cursor.getInd()[0] : indxMax; 
+        indyMax = indyMax < cursor.getInd()[1] ? cursor.getInd()[1] : indyMax;
       }
     }
   }
