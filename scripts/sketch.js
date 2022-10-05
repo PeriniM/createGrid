@@ -98,3 +98,11 @@ function mouseInside(){
   }
 }
 
+function saveCSV(){
+  if (array_shapes.length==0){
+    alert("There are no elements on the grid!")
+  }
+  else{
+    
+  }
+}

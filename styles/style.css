@@ -6,12 +6,5 @@ html, body {
 canvas {
   display: block;
 }
-#titolo{
-  margin: auto;
-  background-color: #00b894;
-  text-align: center;
-  color: aliceblue;
-  padding: 0.1em;
-  font-size: 2em;
-}
+
 
