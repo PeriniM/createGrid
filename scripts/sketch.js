@@ -103,6 +103,9 @@ function saveCSV(){
     alert("There are no elements on the grid!")
   }
   else{
-    
+    let writer = createWriter('newFile.txt');
+    writer.write(['Hello world!']);
+    writer.close();
   }
+  return false;
 }
