@@ -104,11 +104,16 @@ function saveCSV(){
   }
   else{
     let x = "", y = ""; 
-    x = array_shapes[0].indicesX.toString()
-    y = array_shapes[0].indicesY.toString()
+    let writer = createWriter('createGrid().csv');
+    writer.write(["id, x_vert, y_vert, num_vert\n"]);
+    
+    for (let i = 0; i<array_shapes.length; i++){
+      x = array_shapes[i].indicesX.toString().replace(/,/g, ' ');
+      y = array_shapes[i].indicesY.toString().replace(/,/g, ' ');
+      num_vert = array_shapes[i].indicesX.length.toString();
 
-    let writer = createWriter('newFile.csv');
-    writer.write(["x = " + x + "\n" + "y = " + y]);
+      writer.write([i.toString()+","+x+","+y+","+num_vert+"\n"]);
+    }
     writer.close();
   }
   return false;
