@@ -4,6 +4,13 @@ createGrid() is a one-page application that lets you create elements with vertic
 # Why?
 To quickly generate grid elements which can be used for repetitive patterns. Main applications can be found on the analysis of new grids for Finite Element Methods (FEM) or Virtual Element Methods (VEM) algorithms. 
 
+# Overview
+User Interface where you can add closed shapes on a grid.
+![overviewgrid](img_readme/overview_grid.PNG?raw=true "Overview Grid")
+
+The elements can be exported as a CSV file, which can then be used in third-party software, such as Matlab, to create new types of grid.
+![matlabplot](img_readme/matlab_plot.JPG?raw=true "Matlab Plot")
+
 # Roadmap
 #### UI changes
 - [x] Add Download CSV button
