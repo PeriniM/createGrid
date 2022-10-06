@@ -103,8 +103,12 @@ function saveCSV(){
     alert("There are no elements on the grid!")
   }
   else{
-    let writer = createWriter('newFile.txt');
-    writer.write(['Hello world!']);
+    let x = "", y = ""; 
+    x = array_shapes[0].indicesX.toString()
+    y = array_shapes[0].indicesY.toString()
+
+    let writer = createWriter('newFile.csv');
+    writer.write(["x = " + x + "\n" + "y = " + y]);
     writer.close();
   }
   return false;
