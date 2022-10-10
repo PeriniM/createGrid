@@ -1,6 +1,7 @@
 %% Import the CSV and create a cell variable for the shape
 clear
 clc
+addpath('shapes_csv\')
 T = readcell('star.csv');
 shape = cell(height(T)-1,2);
 x_max = -1e5;
