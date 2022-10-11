@@ -1,7 +1,7 @@
 %% Import the CSV and create a cell variable for the shape
 clear
 clc
-addpath('shapes_csv\')
+addpath('shapes_csv\');
 T = readcell('star.csv');
 shape = cell(height(T)-1,2);
 x_max = -1e5;
@@ -9,12 +9,15 @@ y_max = -1e5;
 x_min = 1e5;
 y_min = 1e5;
 
+%build the shape into a cell variable
 for i = 2:height(T)
     x = str2num(string(T(i,2)));
     y = str2num(string(T(i,3)))*-1;
     %plot([x, x(1)],[y, y(1)])
     shape{i-1,1} = x;
     shape{i-1,2} = y;
+
+    % takes min and max of both axes for normalization
     if x_max<max(x)
         x_max = max(x);
     end
@@ -29,7 +32,7 @@ for i = 2:height(T)
     end
 end
 
-%% normalize coordinates from 0 to 1
+%% normalize coordinates from 0 to 1 in both axes (square)
 for j = 1:width(shape)
     for i = 1:height(shape)
         if j == width(shape)
@@ -45,7 +48,7 @@ end
 figure(1)
 hold on
 for i = 1:height(shape)
-    %return to initial point
+    %reconnect to initial point
     plot([shape{i,1}(1,:) shape{i,1}(1,1)], [shape{i,2}(1,:) shape{i,2}(1,1)])
     h=text(mean(shape{i,1}), mean(shape{i,2}), {num2str(i)});
     set(h,'color','r')
@@ -56,8 +59,9 @@ grid minor
 hold off
 
 %% grid parameters
-x0=0; y0=0;
-f1=1; f2=1;  
+x0=0; y0=0; % grid origin
+f1=1; % grid width
+f2=1; % grid height
 xmin_grid=x0; xmax_grid=x0+f1;  
 ymin_grid=y0; ymax_grid=y0+f2;  
 
@@ -68,10 +72,13 @@ dy=f2/suddy;
 
 %% create grid
 indelem=0;
+% cells to store x and y coordinates of each element
 elem_x=cell(suddx*suddy*height(shape),1);
 elem_y=cell(suddx*suddy*height(shape),1);
+% store the indexes of nodes for each element
 elem=cell(suddx*suddy*height(shape),1);
 
+% initial coordinates for the elements to build the grid
 x_start = xmin_grid;
 y_start = ymax_grid-dy;
 
@@ -79,9 +86,11 @@ for i=1:suddy
     for j=1:suddx
         indelem=indelem+1;
         for k = 1:height(shape)
+            % add x and y coordinates to separate cells
             elem_x{indelem,:}=shape{k,1}*dx+x_start;
             elem_y{indelem,:}=shape{k,2}*dy+y_start;
 
+            % build up the nodes coordinates
             if indelem==1
                 nodi_x = elem_x{indelem,:};
                 nodi_y = elem_y{indelem,:};
@@ -90,12 +99,15 @@ for i=1:suddy
                 nodi_y = [nodi_y elem_y{indelem,:}];
             end
 
+            % dont update indelem twice
             if k<height(shape)
                 indelem=indelem+1;
             end
         end
+        % move cordinates to the right for next element
         x_start = x_start + dx;
     end
+    % move cordinates to the bottom for next element
     x_start = xmin_grid;
     y_start=y_start - dy;
 end
