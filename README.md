@@ -9,7 +9,7 @@ To quickly generate grid elements which can be used for repetitive patterns. Mai
 User Interface where you can add closed shapes on a grid.
 ![overviewgrid](img_readme/overview_grid_star.PNG?raw=true "Overview Grid" )
 
-The elements can be exported as a CSV file, which can then be used in third-party software, such as Matlab, to create new types of grid.
+The elements can be exported as a CSV file, which can then be used in third-party software, such as Matlab, to create new types of grid. In the matlab folder you will find a script to normalize and create the grid.
 ![matlabplot](img_readme/matlab_overview_star.PNG?raw=true "Matlab Grid")
 
 Shapes can be plot on matlab, normalizing the coordinates and displaying the enumeration of the elements.
