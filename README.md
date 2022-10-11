@@ -7,10 +7,16 @@ To quickly generate grid elements which can be used for repetitive patterns. Mai
 
 # Overview
 User Interface where you can add closed shapes on a grid.
-![overviewgrid](img_readme/overview_grid.PNG?raw=true "Overview Grid")
+![overviewgrid](img_readme/overview_grid_star.PNG?raw=true "Overview Grid" )
 
 The elements can be exported as a CSV file, which can then be used in third-party software, such as Matlab, to create new types of grid.
-![matlabplot](img_readme/matlab_plot.JPG?raw=true "Matlab Plot")
+![matlabplot](img_readme/matlab_overview_star.PNG?raw=true "Matlab Grid")
+
+Shapes can be plot on matlab, normalizing the coordinates and displaying the enumeration of the elements.
+![stargrid](img_readme/grid_star.PNG?raw=true "Star Grid")
+
+Also the properties of the grid can be adjusted, such as height, width, number of suddivisions etc., and the shapes will adjust accordingly. Right now the algorithm work well with square grids but can be adjusted to work also for rect grids.
+![stargridrect](img_readme/star_rect_grid.PNG?raw=true "Star Rect Grid")
 
 # Roadmap
 #### UI changes
