@@ -40,11 +40,18 @@ class Point {
     return [this.indX, this.indY];
   }
 
-  show(stroke_color, stroke_weight) {
+  show(style, stroke_color, stroke_weight) {
     stroke(stroke_color);
     strokeWeight(stroke_weight);
     if (mouseInside() == true) {
+      if (style=="point"){
       point(this.x, this.y);
+      }
+      else if (style=="cross"){
+        line(this.x-stroke_weight*2, this.y, this.x+stroke_weight*2, this.y);
+        line(this.x, this.y-stroke_weight*2, this.x, this.y+stroke_weight*2);
+        
+      }
     }
   }
 }

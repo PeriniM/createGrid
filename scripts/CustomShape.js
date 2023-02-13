@@ -22,10 +22,16 @@ class CustomShape {
       this.virtual=true;
     }
   
-    show(lineX, lineY){
+    show(lineX, lineY, removing){
       stroke('black');
       strokeWeight(2);
-      fill(this.red, this.green, this.blue, this.alpha);
+      if (removing==false){
+        fill(this.red, this.green, this.blue, this.alpha);
+      }
+      else{
+        fill(255,255,255,255);
+        fill(255,0,0,150);
+      }
       beginShape();
       for (let i = 0; i<this.indicesX.length; i++){
         vertex(lineX[this.indicesX[i]], lineY[this.indicesY[i]]);
@@ -40,6 +46,23 @@ class CustomShape {
         this.indicesX.pop();
         this.indicesY.pop();
       }
+    }
+    isInside(indices){
+      let inside = false;
+      let x = indices[0];
+      let y = indices[1];
+      for (let i = 0, j = this.indicesX.length - 1; i < this.indicesX.length; j = i++) {
+        let xi = this.indicesX[i], yi = this.indicesY[i];
+        let xj = this.indicesX[j], yj = this.indicesY[j];
+        let intersect = ((yi > y) != (yj > y))
+          && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+    removeLast(){
+      this.indicesX.pop();
+      this.indicesY.pop();
     }
   }
   
