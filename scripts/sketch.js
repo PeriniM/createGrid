@@ -36,6 +36,7 @@ function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
   background(bg_color);
   grid_width = width;
+  grid_height = height;
   griglia.update(x_origin,y_origin, grid_width, grid_height);
   cursor.snap(mouseX, mouseY, griglia.lineY, griglia.lineX);
   griglia.show(150,0.5);
@@ -125,14 +126,13 @@ function refreshCanvas(color){
     cursor.show('point',color, griglia.sideLength/4);
   }
   else{
-    cursor.show('cross','#ff0000', griglia.sideLength/12);
+    cursor.show('point','#ff0000', griglia.sideLength/4);
   }
 }
 
 function mouseInside(){
   // check if the mouse is inside the grid
   if (mouseX>=x_origin && mouseX<=x_origin+grid_width &&  mouseY>=y_origin && mouseY<=y_origin+grid_height && isMouseOverBtn==false) {
-
     return true;
   }
   else{
