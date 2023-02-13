@@ -19,7 +19,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   background(bg_color);
   grid_width = width;
-  grid_height = 700;
+  grid_height = height;
   x_origin = 0;
   y_origin = 0;
   griglia = new Grid(x_origin, y_origin, grid_width, grid_height, 30);
