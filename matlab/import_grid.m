@@ -2,20 +2,21 @@
 clear
 clc
 addpath('shapes_csv\');
-T = readcell('star.csv');
-shape = cell(height(T)-1,2);
+T = readtable('star.csv', 'ReadVariableNames',false, 'Delimiter',',', 'HeaderLines',1, 'TreatAsEmpty',{'NA','na'});
+shape = cell(height(T),2);
 x_max = -1e5;
 y_max = -1e5;
 x_min = 1e5;
 y_min = 1e5;
 
 %build the shape into a cell variable
-for i = 2:height(T)
-    x = str2num(string(T(i,2)));
-    y = str2num(string(T(i,3)))*-1;
-    %plot([x, x(1)],[y, y(1)])
-    shape{i-1,1} = x;
-    shape{i-1,2} = y;
+for i = 1:height(T)
+
+    x = str2num(string(T{i,2:3:end}));
+    y = str2num(string(T{i,3:3:end}))*-1;
+    % plot([x, x(1)],[y, y(1)])
+    shape{i,1} = x;
+    shape{i,2} = y;
 
     % takes min and max of both axes for normalization
     if x_max<max(x)
