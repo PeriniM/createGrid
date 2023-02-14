@@ -34,13 +34,17 @@ for i = 1:height(T)
 end
 
 %% normalize coordinates from 0 to 1 in both axes (square)
+
+x_scale = [0 1];
+y_scale = [0 1];
+
 for j = 1:width(shape)
     for i = 1:height(shape)
         if j == width(shape)
             % [A, B] --> [a, b] --> (val - A)*(b-a)/(B-A) + a
-            shape{i,j} = (shape{i,j} - y_min)/(y_max-y_min);
+            shape{i,j} = (shape{i,j} - y_min)*(y_scale(2)-y_scale(1))/(y_max-y_min) + y_scale(1);
         else
-            shape{i,j} = (shape{i,j} - x_min)/(x_max-x_min);
+            shape{i,j} = (shape{i,j} - x_min)*(x_scale(2)-x_scale(1))/(x_max-x_min) + x_scale(1);
         end
     end
 end
@@ -58,3 +62,113 @@ daspect([1 1 1])
 grid on
 grid minor
 hold off
+
+%% Points definition for WMR
+
+pos_xy = [shape{1,1}(1,:); shape{1,2}(1,:)]; % initial position
+
+figure(1), hold on, grid on
+plot(pos_xy(1,:),pos_xy(2,:),'r*')
+
+%Choice best limits for plotting
+axis equal
+AXIS=axis;
+magAxisXY=1.1;
+AxisFrameXY=(max(pos_xy(1,:))-min(pos_xy(1,:)))*(magAxisXY-1);
+axis([min(pos_xy(1,:))-AxisFrameXY max(pos_xy(1,:))+AxisFrameXY AXIS(3)-AxisFrameXY AXIS(4)+AxisFrameXY])
+%Plot labels and title
+xlabel('x [m]') 
+ylabel('y [m]')
+point_labels = cellstr( num2str([1:numel(pos_xy)/2]') );  
+text(pos_xy(1,:), pos_xy(2,:), point_labels, 'VerticalAlignment','bottom', 'HorizontalAlignment','right')
+title('Points to be reached by the WMR')
+
+%% Points interpolation with linear time
+
+% Trajectory generation (Path-> nonlinear geometry + time linear in time)
+% =====================================================
+%
+% One would rather to connect a set of positions occupied by the WMR in 
+% the X,Y cartesian space considering different strategies for
+% guaranteering different level of path "smoothing" between points.
+%
+%   (0, 0), (0.5, 2), (2, -2), (3.5, 2), (4, 0)
+%
+%     1         2        3         4       5
+%
+% For example it might be required to connect points 123 and 345 with a
+% cubic interpolator.
+
+
+Ts=0.01; %Sampling time -> t =  Ts x iteration + t0
+
+
+t = [0:1:length(pos_xy)-1]
+x = [pos_xy(1,:)]
+y = [pos_xy(2,:)]
+
+
+
+%PLAY WITH THIS SETTINGS
+%npoints=3; %  <==== Link between this two values !!! npoints > Norder
+npoints=max(size(t)); %  <==== Link between this two values !!! npoints > Norder
+%Norder=1;  %  <====
+%Norder=3:  %  <====
+Norder=npoints; % <====
+
+y2 = [];
+x2 = [];
+t2 = [];
+
+npoints_tmax=length(t);
+%for iterposition=1+npoints:length(t)
+for iterposition=1+npoints:npoints:npoints_tmax
+  t2t = [t(iterposition-npoints):Ts:t(iterposition)];
+  x2 = [x2 polyval(polyfit(t(iterposition-npoints:iterposition),x(iterposition-npoints:iterposition),Norder),t2t)];
+  y2 = [y2 polyval(polyfit(t(iterposition-npoints:iterposition),y(iterposition-npoints:iterposition),Norder),t2t)];
+  t2 = [t2 t2t];
+end
+endingpoints=mod(npoints_tmax-1,npoints);
+if endingpoints>0, 
+  if npoints>1, npoints=endingpoints;
+    Norder=npoints;
+    t2t = [t(end-npoints):Ts:t(end)];
+    x2 = [x2 polyval(polyfit(t(end-npoints:end),x(end-npoints:end),Norder),t2t)];
+    y2 = [y2 polyval(polyfit(t(end-npoints:end),y(end-npoints:end),Norder),t2t)];
+    t2 = [t2 t2t];
+  else
+    npoints=1;
+    t2t = t(end-1):Ts:t(end);
+    x2 = [x2 polyval(polyfit(t(end-1:end),x(end-1:end),Norder),t2t)];
+    y2 = [y2 polyval(polyfit(t(end-1:end),y(end-1:end),Norder),t2t)];
+    t2 = [t2 t2t];
+  end
+end
+
+
+figure(3)
+title('Plot of y(t) and x(t)')
+hold on, grid on
+plot(t,x,'m*')
+plot(t,y,'c*')
+label_t2x2=plot(t2,x2,'co',t2,x2,'r');
+label_t2y2=plot(t2,y2,'mo',t2,y2,'b');
+legend([label_t2y2(2) label_t2x2(2)],'y(t)','x(t)')
+%title('Plot of Data (Points) and Model (Line)')
+xlabel('t [s]')
+ylabel('s [m]')
+
+figure(2)
+hold on, grid on
+label_x2y2=plot(x,y,'o',x2,y2,'g')
+legend(label_x2y2(2),'Traj(x,y)')
+xlabel('x [m]')
+ylabel('y [m]')
+axis equal
+%axis square
+AXIS=axis;
+magAxisXY=1.1;
+AxisFrameXY=max([(max(x2(1,:))-min(x2(1,:)))*(magAxisXY-1) (max(y2(1,:))-min(y2(1,:)))*(magAxisXY-1)]);
+axis([min(x2(1,:))-AxisFrameXY max(x2(1,:))+AxisFrameXY min(y2(1,:))-AxisFrameXY max(y2(1,:))+AxisFrameXY])
+
+title(['Path Interpolation'])
