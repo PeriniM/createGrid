@@ -9,11 +9,15 @@ let indxMax = 0;
 let indyMax = 0;
 
 let add_btn = document.getElementById('button-add');
+let select_btn = document.getElementById('button-select');
 let remove_btn = document.getElementById('button-remove');
 let clear_btn = document.getElementById('button-clear');
 let save_csv_btn = document.getElementById('button-csv');
+let empty_alert = document.getElementById('empty-alert');
+let alert_close_btn = document.getElementById('close-alert');
 let isMouseOverBtn = false;
-let removeToggle = false;
+let removeToggle = false, selectToggle = false;
+let timeOutAlert;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -142,7 +146,11 @@ function mouseInside(){
 
 function saveCSV(){
   if (array_shapes.length==0){
-    alert("There are no elements on the grid!")
+    empty_alert.style.display = "block";
+    timeOutAlert = setTimeout(function(){
+        empty_alert.style.display = "none";
+        selectToggle = false;
+      }, 3000);
   }
   else{
     let x = "", y = ""; 
@@ -172,6 +180,27 @@ window.onload = function() {
   });
   add_btn.addEventListener('click', function(){
     removeToggle = false;
+    selectToggle = false;
+  });
+  select_btn.addEventListener('mouseover', function(){
+    isMouseOverBtn = true;
+  });
+  select_btn.addEventListener('mouseout', function(){
+    isMouseOverBtn = false;
+  });
+  select_btn.addEventListener('click', function(){
+    removeToggle = false;
+    selectToggle = true;
+    // if there are no shapes, show an alert
+    if (array_shapes.length==0){
+      // show the alert container div for 3 seconds
+
+      empty_alert.style.display = "block";
+      timeOutAlert = setTimeout(function(){
+        empty_alert.style.display = "none";
+        selectToggle = false;
+      }, 3000);
+    }
   });
   remove_btn.addEventListener('mouseover', function(){
     isMouseOverBtn = true;
@@ -181,6 +210,7 @@ window.onload = function() {
   });
   remove_btn.addEventListener('click', function(){
     removeToggle = true;
+    selectToggle = false;
   });
   clear_btn.addEventListener('mouseover', function(){
     isMouseOverBtn = true;
@@ -203,5 +233,17 @@ window.onload = function() {
   });
   save_csv_btn.addEventListener('click', function(){
     saveCSV();
+  });
+  empty_alert.addEventListener('mouseover', function(){
+    isMouseOverBtn = true;
+  });
+  empty_alert.addEventListener('mouseout', function(){
+    isMouseOverBtn = false;
+  });
+  alert_close_btn.addEventListener('click', function(){
+    isMouseOverBtn = false;
+    selectToggle = false;
+    empty_alert.style.display = "none";
+    clearTimeout(timeOutAlert);
   });
 };

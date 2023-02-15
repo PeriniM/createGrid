@@ -43,10 +43,19 @@
 
     <div style="padding-bottom: 0.5em;"></div>
 
-    
+    <div class="container-empty-alert" id="empty-alert">
+          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Warning!</strong> There are no elements on the grid!
+            <br>Create one using the 'Add' button.
+            <button type="button" class="close" id="close-alert">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+    </div>
     <div class="bottom-menu">
       <div class="btn-group" role="group" aria-label="Basic example">
         <button type="button" id="button-add" class="btn btn-dark btn-lg">Add</button>
+        <button type="button" id="button-select" class="btn btn-dark btn-lg">Select</button>
         <button type="button" id="button-remove" class="btn btn-dark btn-lg">Remove</button>
         <button type="button" id="button-clear" class="btn btn-dark btn-lg">Clear</button>
         <button type="button" id="button-csv" href="#" class="btn btn-info btn-lg">Download CSV</button>
