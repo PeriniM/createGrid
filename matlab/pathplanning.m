@@ -180,7 +180,7 @@ theta = atan2(diff(y2), diff(x2));
 theta = [theta(1) theta];
 
 % calculate the velocity
-v = sqrt((y2(2:end)-y2(1:end-1)).^2 + (x2(2:end)-x2(1:end-1)).^2)/Ts;
+v = sqrt(diff(y2).^2 + diff(x2).^2)/Ts;
 
 % Create a figure and axes for the plot
 fig = figure(4);
@@ -198,6 +198,10 @@ for i = 2:length(x2)
     % Update the position and orientation of the unicycle
     set(unicycle, 'XData', x2(i), 'YData', y2(i), 'Marker', 'o', 'Color', 'r', 'LineStyle', '-');
     set(unicycle, 'Marker', 'o', 'Color', 'r', 'LineStyle', '-');
-    %drawnow;
+    drawnow;
     pause((t2t(i)-t2t(i-1))/100);
 end
+
+%% create a polygon shape
+pgon = polyshape([-1 1 0]*0.05,[0 0 3]*0.05);
+plot(pgon)
