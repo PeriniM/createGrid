@@ -22,15 +22,20 @@ class CustomShape {
       this.virtual=true;
     }
   
-    show(lineX, lineY, removing){
+    show(lineX, lineY, toggle){
       stroke('black');
       strokeWeight(2);
-      if (removing==false){
-        fill(this.red, this.green, this.blue, this.alpha);
-      }
-      else{
+      if (toggle=='remove'){
         fill(255,255,255,255);
         fill(255,0,0,150);
+      }
+      else if (toggle=='select'){
+        fill(255,255,255,255);
+        fill(this.red, this.green, this.blue,150);
+      }
+      else{
+        fill(this.red, this.green, this.blue, this.alpha);
+        
       }
       beginShape();
       for (let i = 0; i<this.indicesX.length; i++){
@@ -63,6 +68,12 @@ class CustomShape {
     removeLast(){
       this.indicesX.pop();
       this.indicesY.pop();
+    }
+    changeColor(color){
+      this.red = color[0];
+      this.green = color[1];
+      this.blue = color[2];
+      this.alpha = color[3];
     }
   }
   

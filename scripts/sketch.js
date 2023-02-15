@@ -52,7 +52,7 @@ function windowResized(){
 }
 
 function mouseMoved(){
-  refreshCanvas('#1abc9c');
+  refreshCanvas();
   if (new_shape == true){
     array_shapes[array_shapes.length-1].createVirtual(cursor.getInd());
   }
@@ -60,7 +60,15 @@ function mouseMoved(){
   if (removeToggle == true){
     for(let i = 0; i<array_shapes.length; i++){
       if (array_shapes[i].isInside(cursor.getInd()) == true){
-        array_shapes[i].show(griglia.lineX, griglia.lineY, true);
+        array_shapes[i].show(griglia.lineX, griglia.lineY, 'remove');
+        break;
+      }
+    }
+  }
+  else if (selectToggle == true){
+    for(let i = 0; i<array_shapes.length; i++){
+      if (array_shapes[i].isInside(cursor.getInd()) == true){
+        array_shapes[i].show(griglia.lineX, griglia.lineY, 'select');
         break;
       }
     }
@@ -69,9 +77,9 @@ function mouseMoved(){
 
 function mousePressed(){
   if (mouseButton === LEFT && mouseInside()==true) {
-    refreshCanvas('#16a085');
+    refreshCanvas();
     if (removeToggle == true){
-      // if a new shape is being created, remove the last point
+      // if a new shape is being created, remove the whole shape
       if (new_shape == true){
         // remove the shape
           array_shapes.pop();
@@ -82,6 +90,22 @@ function mousePressed(){
         for(let i = 0; i<array_shapes.length; i++){
           if (array_shapes[i].isInside(cursor.getInd()) == true){
             array_shapes.splice(i,1);
+            break;
+          }
+        }
+      }
+    }
+    else if (selectToggle == true){
+      if (new_shape == true){
+        // remove the shape
+          array_shapes.pop();
+          new_shape = false;
+      }   
+      // if a new shape is not being created, check if the cursor is over a shape and change its color
+      else{
+        for(let i = 0; i<array_shapes.length; i++){
+          if (array_shapes[i].isInside(cursor.getInd()) == true){
+            array_shapes[i].changeColor([random(100,255),random(100,255),random(100,255), 100]);
             break;
           }
         }
@@ -113,24 +137,27 @@ function mousePressed(){
 
 function mouseReleased(){
   if (mouseInside()==true){
-    refreshCanvas('#1abc9c');
+    refreshCanvas();
   }
 }
 
-function refreshCanvas(color){
+function refreshCanvas(){
   background(bg_color);
   griglia.show(150,0.5);
   cursor.snap(mouseX, mouseY, griglia.lineY, griglia.lineX);
   if (array_shapes.length!=0){
     for(let i = 0; i<array_shapes.length; i++){
-      array_shapes[i].show(griglia.lineX, griglia.lineY, false);
+      array_shapes[i].show(griglia.lineX, griglia.lineY, 'add');
     }
   }
-  if (!removeToggle){
-    cursor.show('point',color, griglia.sideLength/4);
+  if (removeToggle){
+    cursor.show('point','#ff0000', griglia.sideLength/4);
+  }
+  else if (selectToggle){
+    cursor.show('point','#9370DB', griglia.sideLength/4);
   }
   else{
-    cursor.show('point','#ff0000', griglia.sideLength/4);
+    cursor.show('point','#1abc9c', griglia.sideLength/4);
   }
 }
 
@@ -144,7 +171,7 @@ function mouseInside(){
   }
 }
 
-function saveCSV(){
+function saveCSV(array_shapes){
   if (array_shapes.length==0){
     empty_alert.style.display = "block";
     timeOutAlert = setTimeout(function(){
@@ -168,6 +195,8 @@ function saveCSV(){
   }
   return false;
 }
+
+// DOM ELEMENTS
 
 // wait for the page to load
 window.onload = function() {
@@ -223,6 +252,8 @@ window.onload = function() {
     new_shape = false;
     indxMax = 0;
     indyMax = 0;
+    selectToggle = false;
+    removeToggle = false;
     refreshCanvas('#1abc9c');
   });
   save_csv_btn.addEventListener('mouseover', function(){
@@ -232,7 +263,7 @@ window.onload = function() {
     isMouseOverBtn = false;
   });
   save_csv_btn.addEventListener('click', function(){
-    saveCSV();
+    saveCSV(array_shapes);
   });
   empty_alert.addEventListener('mouseover', function(){
     isMouseOverBtn = true;
