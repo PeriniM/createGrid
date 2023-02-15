@@ -19,6 +19,9 @@ let isMouseOverBtn = false;
 let removeToggle = false, selectToggle = false;
 let timeOutAlert;
 
+let colorPicker;
+let colorPicked;
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(bg_color);
@@ -30,10 +33,17 @@ function setup() {
   griglia.create();
   griglia.show(150,0.5);
   cursor = new Point();
+
+  colorPicker = createColorPicker( '#ff0000' );
+  colorPicker.position(width/2, height/2);
+  colorPicker.style('display', 'none');
+    
+  
+  
 }
 
 function draw() {
-
+  
 }
 
 function windowResized(){
@@ -105,7 +115,13 @@ function mousePressed(){
       else{
         for(let i = 0; i<array_shapes.length; i++){
           if (array_shapes[i].isInside(cursor.getInd()) == true){
-            array_shapes[i].changeColor([random(100,255),random(100,255),random(100,255), 100]);
+            colorPicker.input(function() {
+              colorPicked = colorPicker.color().levels.slice(0, 3).concat(100);
+              array_shapes[i].changeColor(colorPicked);
+            });
+            colorPicker.elt.click();
+            
+            //array_shapes[i].changeColor([random(100,255),random(100,255),random(100,255), 100]);
             break;
           }
         }
@@ -159,6 +175,7 @@ function refreshCanvas(){
   else{
     cursor.show('point','#1abc9c', griglia.sideLength/4);
   }
+  
 }
 
 function mouseInside(){
