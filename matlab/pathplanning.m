@@ -55,8 +55,8 @@ hold on
 for i = 1:height(shape)
     %reconnect to initial point
     plot([shape{i,1}(1,:) shape{i,1}(1,1)], [shape{i,2}(1,:) shape{i,2}(1,1)])
-    h=text(mean(shape{i,1}), mean(shape{i,2}), {num2str(i)});
-    set(h,'color','r')
+%     h=text(mean(shape{i,1}), mean(shape{i,2}), {num2str(i)});
+%     set(h,'color','r')
 end
 daspect([1 1 1])
 grid on
@@ -161,7 +161,7 @@ ylabel('s [m]')
 figure(2)
 hold on, grid on
 label_x2y2=plot(x,y,'o',x2,y2,'g')
-legend(label_x2y2(2),'Traj(x,y)')
+
 xlabel('x [m]')
 ylabel('y [m]')
 axis equal
@@ -172,3 +172,32 @@ AxisFrameXY=max([(max(x2(1,:))-min(x2(1,:)))*(magAxisXY-1) (max(y2(1,:))-min(y2(
 axis([min(x2(1,:))-AxisFrameXY max(x2(1,:))+AxisFrameXY min(y2(1,:))-AxisFrameXY max(y2(1,:))+AxisFrameXY])
 
 title(['Path Interpolation'])
+
+%% animation unicycle on interpolated path
+
+% calculate the angle theta from the velocity
+theta = atan2(diff(y2), diff(x2));
+theta = [theta(1) theta];
+
+% calculate the velocity
+v = sqrt((y2(2:end)-y2(1:end-1)).^2 + (x2(2:end)-x2(1:end-1)).^2)/Ts;
+
+% Create a figure and axes for the plot
+fig = figure(4);
+ax = axes('XLim', [min(x2)-1, max(x2)+1], 'YLim', [min(y2)-1, max(y2)+1]);
+
+% Plot the path
+plot(x,y,'o',x2,y2,'g');
+hold on;
+
+% Initialize the unicycle at the start of the path
+unicycle = line('XData', x2(1), 'YData', y2(1), 'Marker', 'o', 'Color', 'r');
+
+% Animate the unicycle along the path
+for i = 2:length(x2)
+    % Update the position and orientation of the unicycle
+    set(unicycle, 'XData', x2(i), 'YData', y2(i), 'Marker', 'o', 'Color', 'r', 'LineStyle', '-');
+    set(unicycle, 'Marker', 'o', 'Color', 'r', 'LineStyle', '-');
+    %drawnow;
+    pause((t2t(i)-t2t(i-1))/100);
+end
