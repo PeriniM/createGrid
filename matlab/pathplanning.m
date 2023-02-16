@@ -2,7 +2,7 @@
 clear
 clc
 addpath('shapes_csv\');
-T = readtable('path1.csv', 'ReadVariableNames',false, 'Delimiter',',', 'HeaderLines',1, 'TreatAsEmpty',{'NA','na'});
+T = readtable('path2.csv', 'ReadVariableNames',false, 'Delimiter',',', 'HeaderLines',1, 'TreatAsEmpty',{'NA','na'});
 shape = cell(height(T),2);
 x_max = -1e5;
 y_max = -1e5;
@@ -100,7 +100,7 @@ title('Points to be reached by the WMR')
 % cubic interpolator.
 
 
-Ts=0.01; %Sampling time -> t =  Ts x iteration + t0
+Ts=0.1; %Sampling time -> t =  Ts x iteration + t0
 
 
 t = [0:1:length(pos_xy)-1]
@@ -165,11 +165,7 @@ label_x2y2=plot(x,y,'o',x2,y2,'g')
 xlabel('x [m]')
 ylabel('y [m]')
 axis equal
-%axis square
-AXIS=axis;
-magAxisXY=1.1;
-AxisFrameXY=max([(max(x2(1,:))-min(x2(1,:)))*(magAxisXY-1) (max(y2(1,:))-min(y2(1,:)))*(magAxisXY-1)]);
-axis([min(x2(1,:))-AxisFrameXY max(x2(1,:))+AxisFrameXY min(y2(1,:))-AxisFrameXY max(y2(1,:))+AxisFrameXY])
+daspect([1 1 1])
 
 title(['Path Interpolation'])
 
@@ -180,17 +176,19 @@ theta = atan2(diff(y2), diff(x2));
 theta = [theta(1) theta];
 
 % calculate the velocity
-v = sqrt(diff(y2).^2 + diff(x2).^2)/Ts;
+%v = sqrt(diff(y2).^2 + diff(x2).^2)/Ts;
 
 % Create a figure and axes for the plot
-fig = figure(4);
-ax = axes('XLim', [min(x2)-1, max(x2)+1], 'YLim', [min(y2)-1, max(y2)+1]);
+%fig = figure(4);
+%ax = axes('XLim', [min(x2)-1, max(x2)+1], 'YLim', [min(y2)-1, max(y2)+1]);
 
 % Plot the path
-plot(x,y,'o',x2,y2,'g');
-hold on;
-
+%plot(x,y,'o',x2,y2,'g');
+%hold on;
+%axis equal
+% daspect([1 1 1])
 % Initialize the unicycle at the start of the path
+
 unicycle = line('XData', x2(1), 'YData', y2(1), 'Marker', 'o', 'Color', 'r');
 
 % Animate the unicycle along the path
@@ -198,10 +196,14 @@ for i = 2:length(x2)
     % Update the position and orientation of the unicycle
     set(unicycle, 'XData', x2(i), 'YData', y2(i), 'Marker', 'o', 'Color', 'r', 'LineStyle', '-');
     set(unicycle, 'Marker', 'o', 'Color', 'r', 'LineStyle', '-');
+    %comment drawnow if you have performance issues
     drawnow;
     pause((t2t(i)-t2t(i-1))/100);
 end
 
+hold off;
+
 %% create a polygon shape
-pgon = polyshape([-1 1 0]*0.05,[0 0 3]*0.05);
-plot(pgon)
+
+% pgon = polyshape([-1 1 0]*0.05,[0 0 3]*0.05);
+% plot(pgon)
