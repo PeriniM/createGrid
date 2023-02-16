@@ -145,19 +145,6 @@ if endingpoints>0,
   end
 end
 
-
-figure(3)
-title('Plot of y(t) and x(t)')
-hold on, grid on
-plot(t,x,'m*')
-plot(t,y,'c*')
-label_t2x2=plot(t2,x2,'co',t2,x2,'r');
-label_t2y2=plot(t2,y2,'mo',t2,y2,'b');
-legend([label_t2y2(2) label_t2x2(2)],'y(t)','x(t)')
-%title('Plot of Data (Points) and Model (Line)')
-xlabel('t [s]')
-ylabel('s [m]')
-
 figure(2)
 hold on, grid on
 label_x2y2=plot(x,y,'o',x2,y2,'g')
@@ -207,3 +194,50 @@ hold off;
 
 % pgon = polyshape([-1 1 0]*0.05,[0 0 3]*0.05);
 % plot(pgon)
+
+%% MatLab: spline tutorial (Part2)
+% Extraction of vel. and acc. from a path/trajectory
+% Impose Ps/Pe, vel and acc. 
+%
+%
+
+
+vx2 = [0 diff(x2)]; 
+vy2 = [0 diff(y2)]; 
+ax2 = [0 diff(vx2)]; 
+ay2 = [0 diff(vy2)]; 
+
+figure
+
+subplot(1,3,1), hold on, grid on
+plot(t,x,'m*')
+plot(t,y,'c*')
+label_t2x2=plot(t2,x2,'co',t2,x2,'r');
+label_t2y2=plot(t2,y2,'mo',t2,y2,'b');
+legend([label_t2y2(2) label_t2x2(2)],'y(t)','x(t)')
+title('Plot of y(t) and x(t)')
+%title('Plot of Data (Points) and Model (Line)')
+xlabel('t [s]')
+ylabel('s [m]')
+
+%title('Plot of y(t) and x(t)')
+subplot(1,3,2), hold on, grid on
+plot(t2,vx2,'m*')
+plot(t2,vx2,'c*')
+label_t2x2=plot(t2,vx2,'co',t2,vx2,'r');
+label_t2y2=plot(t2,vy2,'mo',t2,vy2,'b');
+legend([label_t2y2(2) label_t2x2(2)],'Vy(t)','Vx(t)')
+title('Etraction of V_x and V_y from (x,y)')
+xlabel('t [s]')
+ylabel('v [m/s]')
+
+%title('Plot of y(t) and x(t)')
+subplot(1,3,3), hold on, grid on
+plot(t2,ax2,'m*')
+plot(t2,ax2,'c*')
+label_t2x2=plot(t2,ax2,'co',t2,ax2,'r');
+label_t2y2=plot(t2,ay2,'mo',t2,ay2,'b');
+legend([label_t2y2(2) label_t2x2(2)],'Ay(t)','Ax(t)')
+title('Etraction of a_x and a_y from (x,y)')
+xlabel('t [s]')
+ylabel('a [m/s^2]')
