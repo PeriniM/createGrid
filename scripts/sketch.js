@@ -14,6 +14,7 @@ let select_btn = document.getElementById('button-select');
 let remove_btn = document.getElementById('button-remove');
 let clear_btn = document.getElementById('button-clear');
 let save_csv_btn = document.getElementById('button-csv');
+let save_png_btn = document.getElementById('button-png');
 let empty_alert = document.getElementById('empty-alert');
 let alert_close_btn = document.getElementById('close-alert');
 
@@ -26,7 +27,7 @@ let colorPicker;
 let colorPicked;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight, SVG);
+  createCanvas(windowWidth, windowHeight);
   background(bg_color);
   grid_width = width;
   grid_height = height;
@@ -287,6 +288,15 @@ window.onload = function() {
   });
   save_csv_btn.addEventListener('click', function(){
     saveCSV(array_shapes);
+  });
+  save_png_btn.addEventListener('mouseover', function(){
+    isMouseOverBtn = true;
+  });
+  save_png_btn.addEventListener('mouseout', function(){
+    isMouseOverBtn = false;
+  });
+  save_png_btn.addEventListener('click', function(){
+    saveCanvas('createGrid', 'png');
   });
   empty_alert.addEventListener('mouseover', function(){
     isMouseOverBtn = true;
