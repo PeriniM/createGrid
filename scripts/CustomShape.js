@@ -1,4 +1,12 @@
 class CustomShape {
+  /*
+    Define a CustomShape object needed for the creation of the shapes on the grid.
+    The methods allow to add points to the shape, render it on the grid and perform
+    some actions when it is clicked and hovered.
+    The vertices are not stored using absolute coordinates but referencing
+    the indeces of the parent grid.
+  */
+
     constructor(red, green, blue, alpha){
       this.indicesX = [];
       this.indicesY = [];
@@ -9,7 +17,7 @@ class CustomShape {
       this.closed = false;
       this.virtual = false;
     }
-  
+    
     create(indices){
       this.indicesX.push(indices[0]);
       this.indicesY.push(indices[1]);

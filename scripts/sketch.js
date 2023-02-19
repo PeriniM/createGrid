@@ -8,6 +8,7 @@ let new_shape = false;
 let indxMax = 0;
 let indyMax = 0;
 
+// DOM elements definition
 let add_btn = document.getElementById('button-add');
 let select_btn = document.getElementById('button-select');
 let remove_btn = document.getElementById('button-remove');
@@ -15,10 +16,12 @@ let clear_btn = document.getElementById('button-clear');
 let save_csv_btn = document.getElementById('button-csv');
 let empty_alert = document.getElementById('empty-alert');
 let alert_close_btn = document.getElementById('close-alert');
-let isMouseOverBtn = false;
-let removeToggle = false, selectToggle = false;
+
+// Variable for actions on shapes
+let isMouseOverBtn = false, removeToggle = false, selectToggle = false;
 let timeOutAlert;
 
+// Define a ColorPicker object
 let colorPicker;
 let colorPicked;
 
@@ -29,8 +32,11 @@ function setup() {
   grid_height = height;
   x_origin = 0;
   y_origin = 0;
+
+  // Grid(x0, y0, w, h, horizontal_subdivisions)
   griglia = new Grid(x_origin, y_origin, grid_width, grid_height, 30);
   griglia.create();
+  // show(stroke_color, stroke_weight)
   griglia.show(150,0.5);
   cursor = new Point();
 
