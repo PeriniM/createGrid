@@ -26,7 +26,7 @@ let colorPicker;
 let colorPicked;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight, SVG);
   background(bg_color);
   grid_width = width;
   grid_height = height;
