@@ -121,7 +121,7 @@ x2 = [];
 t2 = [];
 
 npoints_tmax=length(t);
-%for iterposition=1+npoints:length(t)
+
 for iterposition=1+npoints:npoints:npoints_tmax
   t2t = [t(iterposition-npoints):Ts:t(iterposition)];
   x2 = [x2 polyval(polyfit(t(iterposition-npoints:iterposition),x(iterposition-npoints:iterposition),Norder),t2t)];
@@ -162,30 +162,45 @@ title(['Path Interpolation'])
 theta = atan2(diff(y2), diff(x2));
 theta = [theta(1) theta];
 
-% calculate the velocity
-%v = sqrt(diff(y2).^2 + diff(x2).^2)/Ts;
-
-% Create a figure and axes for the plot
-%fig = figure(4);
-%ax = axes('XLim', [min(x2)-1, max(x2)+1], 'YLim', [min(y2)-1, max(y2)+1]);
-
-% Plot the path
-%plot(x,y,'o',x2,y2,'g');
-%hold on;
-%axis equal
-% daspect([1 1 1])
-% Initialize the unicycle at the start of the path
+% Create a triangle
+% x_uni = [0 1 0.5 0]*0.1;
+% y_uni = [0 0 1 0]*0.1;
+% unicycle = fill(x_uni, y_uni, 'r');
 
 unicycle = line('XData', x2(1), 'YData', y2(1), 'Marker', 'o', 'Color', 'r');
 
+% Find the center of the unicycle
+% xc = mean(x_uni);
+% yc = mean(y_uni);
+
 % Animate the unicycle along the path
 for i = 2:length(x2)
+    
+%     % Compute the rotation matrix from theta
+%     R = [cos(theta(i)) -sin(theta(i)); sin(theta(i)) cos(theta(i))];
+%     
+%     % Rotate the triangle around its center of mass
+%     xy_rotated = R * [x_uni - xc; y_uni - yc];
+%     
+%     % Compute the offset between the original and rotated center of mass
+%     offset = [x2(i); y2(i)] - R * [xc; yc];
+%     
+%     % Compute the distance from the center of mass to the tip of the triangle
+%     d = norm([x_uni(1); y_uni(1)] - [xc; yc]);
+%     
+%     % Shift the rotated triangle so that its tip is at the current point on the trajectory
+%     tip_offset = [x2(i); y2(i)] - R * [xc; yc] - d * R(:,1);
+%     
+%     % Update the position and orientation of the triangle
+%     set(unicycle, 'XData', xy_rotated(1,:) + xc + tip_offset(1), 'YData', xy_rotated(2,:) + yc + tip_offset(2));
+%     
     % Update the position and orientation of the unicycle
     set(unicycle, 'XData', x2(i), 'YData', y2(i), 'Marker', 'o', 'Color', 'r', 'LineStyle', '-');
     set(unicycle, 'Marker', 'o', 'Color', 'r', 'LineStyle', '-');
     %comment drawnow if you have performance issues
     drawnow;
     pause((t2t(i)-t2t(i-1))/100);
+    exportgraphics(gcf,'testAnimated.gif','Append',true);
 end
 
 hold off;
