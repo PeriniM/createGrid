@@ -5,7 +5,7 @@ let cursor;
 let array_shapes = [];
 let bg_color = 255;
 let new_shape = false;
-let shape_type = 'default-shape';
+let shape_type = 'default';
 let indxMax = 0;
 let indyMax = 0;
 

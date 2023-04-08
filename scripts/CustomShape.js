@@ -7,7 +7,7 @@ class CustomShape {
     the indeces of the parent grid.
   */
 
-    constructor(red, green, blue, alpha){
+    constructor(shape_type, red, green, blue, alpha){
       this.indicesX = [];
       this.indicesY = [];
       this.red = red;
@@ -16,6 +16,7 @@ class CustomShape {
       this.alpha = alpha;
       this.closed = false;
       this.virtual = false;
+      this.shape_type = shape_type;
     }
     
     create(indices){

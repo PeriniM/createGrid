@@ -80,8 +80,9 @@ function windowResized(){
         }
       }
       else{
+        // if a shape is not being created, create a new one
         if (new_shape == false){
-          array_shapes.push(new CustomShape(0,random(100,255),random(100,255),100));
+          array_shapes.push(new CustomShape(shape_type,0,random(100,255),random(100,255),100));
           array_shapes[array_shapes.length-1].create(cursor.getInd());
           new_shape = true;
           indxMax = indxMax < cursor.getInd()[0] ? cursor.getInd()[0] : indxMax; 
@@ -150,15 +151,16 @@ function windowResized(){
     }
     else{
       let x = "", y = ""; 
+      let type = "";
       let writer = createWriter('createGrid().csv');
-      writer.write(["id, x_vert, y_vert, num_vert\n"]);
+      writer.write(["id, x_vert, y_vert, num_vert, shape_type\n"]);
       
       for (let i = 0; i<array_shapes.length; i++){
         x = array_shapes[i].indicesX.toString().replace(/,/g, ' ');
         y = array_shapes[i].indicesY.toString().replace(/,/g, ' ');
         num_vert = array_shapes[i].indicesX.length.toString();
-  
-        writer.write([i.toString()+","+x+","+y+","+num_vert+"\n"]);
+        type = array_shapes[i].shape_type;
+        writer.write([i.toString()+","+x+","+y+","+num_vert+","+type+"\n"]);
       }
       writer.close();
     }

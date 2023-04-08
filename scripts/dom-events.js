@@ -90,7 +90,7 @@ window.onload = function() {
   
     // TYPE OF SHAPES SELECTOR
     default_shape_btn.addEventListener('click', function(){
-      shape_type = 'default-shape';
+      shape_type = 'default';
       console.log(shape_type);
     });
     room_shape_btn.addEventListener('click', function(){
