@@ -6,6 +6,8 @@
     <script src="scripts/Grid.js"></script>
     <script src="scripts/Point.js"></script>
     <script src="scripts/CustomShape.js"></script>
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/dom-events.js"></script>
     <link rel="stylesheet" type="text/css" href="styles/style.css" />
     <link
       rel="stylesheet"
@@ -56,12 +58,30 @@
 
     <div class="bottom-menu">
       <div class="btn-group flex-wrap" role="group" aria-label="Basic example">
-        <button type="button" id="button-add" class="btn btn-dark btn-lg">Add</button>
+        <div class="btn-group dropup" id="button-add">
+          <button type="button" id="button-add" class="btn btn-dark btn-lg">
+            Add
+          </button>
+          <button type="button" class="btn btn-dark btn-lg dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <div class="dropdown-menu">
+            <a type="button" class="dropdown-item" href="#" id="default-shape">Default</a>
+            <a type="button" class="dropdown-item" href="#" id="room-shape">Room</a>
+            <a type="button" class="dropdown-item" href="#" id="obstacle-shape">Obstacle</a>
+            <a type="button" class="dropdown-item" href="#" id="agent-shape">Agent</a>
+            <a type="button" class="dropdown-item" href="#" id="uwb-anchor-shape">UWB Anchor</a>
+            <a type="button" class="dropdown-item" href="#" id="uwb-sensor-shape">UWB Sensor</a>
+            <a type="button" class="dropdown-item" href="#" id="stereo-camera-shape">Stereo Camera</a>
+            <a type="button" class="dropdown-item" href="#" id="lidar-shape">LiDAR</a>
+          </div>
+        </div>
         <button type="button" id="button-select" class="btn btn-dark btn-lg">Select</button>
         <button type="button" id="button-remove" class="btn btn-dark btn-lg">Remove</button>
         <button type="button" id="button-clear" class="btn btn-dark btn-lg">Clear</button>
         <button type="button" id="button-csv" href="#" class="btn btn-info btn-lg">CSV</button>
         <button type="button" id="button-png" href="#" class="btn btn-info btn-lg">PNG</button>
+        
       </div>
     </div>
     <script src="scripts/sketch.js"></script>
