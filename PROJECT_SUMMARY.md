@@ -1039,9 +1039,588 @@ if (array_shapes.length == 0) {
 - **Optimized Collision Detection**: Fast point-in-polygon algorithms
 - **Responsive Grid Updates**: Minimal computational overhead during resize
 
+## Implementation Details
+
+This section provides detailed technical implementation information about the core systems that power the createGrid application, including canvas setup, UI framework integration, event handling, and workflow management.
+
+### p5.js Canvas Setup
+
+The application uses p5.js as its primary graphics engine, providing a powerful and flexible foundation for interactive canvas-based drawing.
+
+#### Canvas Initialization Architecture
+```javascript
+function setup() {
+  // Full-window canvas creation
+  createCanvas(windowWidth, windowHeight);
+  background(bg_color); // White background (255)
+  
+  // Grid system initialization
+  grid_width = width;
+  grid_height = height;
+  x_origin = 0;
+  y_origin = 0;
+  
+  // Grid instance creation with 100 subdivisions
+  griglia = new Grid(x_origin, y_origin, grid_width, grid_height, 100);
+  griglia.create();
+  griglia.show(150, 0.5); // Gray grid with minimal stroke weight
+  
+  // Cursor system initialization
+  cursor = new Point();
+  
+  // Color picker widget setup
+  colorPicker = createColorPicker('#ff0000');
+  colorPicker.position(width/2, height/2);
+  colorPicker.style('display', 'none'); // Initially hidden
+}
+```
+
+**Key Implementation Features:**
+- **Dynamic Canvas Sizing**: Canvas automatically fills entire browser window
+- **Responsive Design**: Canvas dimensions update on window resize events
+- **Grid Integration**: Grid system initialized with canvas dimensions
+- **Color Picker Integration**: p5.js color picker widget for shape customization
+- **Minimal Draw Loop**: Empty `draw()` function for performance optimization
+
+#### Canvas Rendering Pipeline
+The application uses an event-driven rendering system rather than continuous animation:
+
+```javascript
+function refreshCanvas() {
+  background(bg_color);                    // Clear canvas
+  griglia.show(150, 0.5);                 // Render grid overlay
+  cursor.snap(mouseX, mouseY, griglia.lineY, griglia.lineX); // Update cursor
+  
+  // Render all existing shapes
+  if (array_shapes.length != 0) {
+    for(let i = 0; i < array_shapes.length; i++) {
+      array_shapes[i].show(griglia.lineX, griglia.lineY, 'add');
+    }
+  }
+  
+  // Render mode-specific cursor
+  if (removeToggle) {
+    cursor.show('point', '#ff0000', griglia.sideLength/4);
+  } else if (selectToggle) {
+    cursor.show('point', '#9370DB', griglia.sideLength/4);
+  } else {
+    cursor.show('point', '#1abc9c', griglia.sideLength/4);
+  }
+}
+```
+
+**Rendering Optimizations:**
+- **Event-Driven Updates**: Only redraws when user interaction occurs
+- **Layered Rendering**: Grid → Shapes → Cursor rendering order
+- **Conditional Rendering**: Shapes only rendered when array is not empty
+- **Mode-Specific Visuals**: Cursor color changes based on current mode
+
+#### Window Responsiveness System
+```javascript
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  background(bg_color);
+  
+  // Update grid parameters
+  grid_width = width;
+  grid_height = height;
+  griglia.update(x_origin, y_origin, grid_width, grid_height);
+  
+  // Refresh all visual elements
+  cursor.snap(mouseX, mouseY, griglia.lineY, griglia.lineX);
+  griglia.show(150, 0.5);
+  
+  // Redraw existing shapes with new grid coordinates
+  if (array_shapes.length != 0) {
+    for(let i = 0; i < array_shapes.length; i++) {
+      array_shapes[i].show(griglia.lineX, griglia.lineY, false);
+    }
+  }
+}
+```
+
+### Bootstrap UI Framework Integration
+
+The application leverages Bootstrap 4.0.0 for responsive UI components and consistent styling across different devices and screen sizes.
+
+#### HTML Structure and Bootstrap Components
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Bootstrap CSS Integration -->
+  <link rel="stylesheet" 
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous" />
+  
+  <!-- Responsive viewport meta tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+```
+
+#### Navigation Bar Implementation
+```html
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="#"><strong>createGrid()</strong></a>
+  
+  <!-- Responsive toggle button for mobile -->
+  <button class="navbar-toggler" type="button" 
+          data-toggle="collapse" data-target="#navbarSupportedContent">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  
+  <!-- Collapsible navigation content -->
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" 
+           role="button" data-toggle="dropdown">GitHub</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" target="_blank" 
+             href="https://github.com/PeriniM/createGrid">createGrid</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" target="_blank" 
+             href="https://github.com/PeriniM/VEM_Grids">VEM Grids</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+```
+
+#### Alert System Integration
+```html
+<div class="container-empty-alert" id="empty-alert">
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>Warning!</strong> There are no elements on the grid!
+    <br>Create one using the 'Add' button.
+    <button type="button" class="close" id="close-alert">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+</div>
+```
+
+#### Bottom Toolbar Implementation
+```html
+<div class="bottom-menu">
+  <div class="btn-group flex-wrap" role="group">
+    <!-- Shape Type Dropdown -->
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-dark btn-lg" id="button-add">Add</button>
+      <button type="button" class="btn btn-dark btn-lg dropdown-toggle dropdown-toggle-split" 
+              data-toggle="dropdown">
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="#" id="default-shape">Default</a>
+        <a class="dropdown-item" href="#" id="room-shape">Room</a>
+        <a class="dropdown-item" href="#" id="obstacle-shape">Obstacle</a>
+        <a class="dropdown-item" href="#" id="agent-shape">Agent</a>
+        <a class="dropdown-item" href="#" id="uwb-anchor-shape">UWB Anchor</a>
+        <a class="dropdown-item" href="#" id="uwb-sensor-shape">UWB Sensor</a>
+        <a class="dropdown-item" href="#" id="stereo-camera-shape">Stereo Camera</a>
+        <a class="dropdown-item" href="#" id="lidar-shape">LiDAR</a>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <button type="button" id="button-select" class="btn btn-dark btn-lg">Select</button>
+    <button type="button" id="button-remove" class="btn btn-dark btn-lg">Remove</button>
+    <button type="button" id="button-clear" class="btn btn-dark btn-lg">Clear</button>
+    
+    <!-- Export Buttons -->
+    <button type="button" id="button-csv" class="btn btn-info btn-lg">CSV</button>
+    <button type="button" id="button-png" class="btn btn-info btn-lg">PNG</button>
+  </div>
+</div>
+```
+
+**Bootstrap Integration Features:**
+- **Responsive Grid System**: Automatic layout adjustment for different screen sizes
+- **Component Library**: Buttons, dropdowns, alerts, and navigation components
+- **Mobile-First Design**: Collapsible navigation and touch-friendly buttons
+- **Consistent Styling**: Professional appearance with minimal custom CSS
+- **Accessibility Support**: ARIA labels and semantic HTML structure
+
+#### Custom CSS Integration
+```css
+.bottom-menu {
+  position: absolute; 
+  left: 0; right: 0; 
+  margin-left: auto; margin-right: auto; 
+  bottom: 40px;
+  padding: 10px;
+  background-color: transparent;
+  text-align: center;
+}
+
+.container-empty-alert {
+  position: absolute; 
+  left: 0; right: 0; 
+  margin-left: auto; margin-right: auto; 
+  top: 10%;
+  width: 50%;
+  text-align: center;
+  display: none;
+}
+```
+
+### DOM Event Handling System
+
+The application implements a comprehensive event handling system that manages user interactions with both the canvas and UI elements.
+
+#### Event Handler Architecture
+```javascript
+window.onload = function() {
+  // Initialize all event listeners after DOM is fully loaded
+  setupButtonEventListeners();
+  setupShapeTypeSelectors();
+  setupExportHandlers();
+  setupAlertHandlers();
+};
+```
+
+#### Button Event Management System
+```javascript
+// Mouse interaction prevention system
+add_btn.addEventListener('mouseover', function(){
+  isMouseOverBtn = true; // Prevents canvas interaction
+});
+add_btn.addEventListener('mouseout', function(){
+  isMouseOverBtn = false; // Re-enables canvas interaction
+});
+
+// Mode switching system
+add_btn.addEventListener('click', function(){
+  removeToggle = false;
+  selectToggle = false;
+  // Enters shape creation mode
+});
+
+select_btn.addEventListener('click', function(){
+  removeToggle = false;
+  selectToggle = true;
+  
+  // Validation: show alert if no shapes exist
+  if (array_shapes.length == 0) {
+    empty_alert.style.display = "block";
+    timeOutAlert = setTimeout(function(){
+      empty_alert.style.display = "none";
+      selectToggle = false;
+    }, 3000);
+  }
+});
+```
+
+#### Shape Type Selection System
+```javascript
+// Dynamic shape type assignment
+default_shape_btn.addEventListener('click', function(){
+  shape_type = 'default';
+  console.log(shape_type); // Debug logging
+});
+
+obstacle_shape_btn.addEventListener('click', function(){
+  shape_type = 'obstacle';
+  console.log(shape_type);
+});
+
+// Pattern continues for all 8 shape types...
+```
+
+#### Canvas Mouse Event Integration
+```javascript
+function mousePressed() {
+  if (mouseButton === LEFT && mouseInside() == true) {
+    refreshCanvas();
+    
+    if (removeToggle == true) {
+      // Shape removal logic
+      if (new_shape == true) {
+        array_shapes.pop(); // Remove incomplete shape
+        new_shape = false;
+      } else {
+        // Remove existing shape under cursor
+        for(let i = 0; i < array_shapes.length; i++) {
+          if (array_shapes[i].isInside(cursor.getInd()) == true) {
+            array_shapes.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+    
+    else if (selectToggle == true) {
+      // Shape selection and color modification logic
+      for(let i = 0; i < array_shapes.length; i++) {
+        if (array_shapes[i].isInside(cursor.getInd()) == true) {
+          colorPicker.style('display', 'block');
+          colorPicked = colorPicker.color();
+          array_shapes[i].changeColor([colorPicked.levels[0], 
+                                      colorPicked.levels[1], 
+                                      colorPicked.levels[2], 
+                                      colorPicked.levels[3]]);
+          break;
+        }
+      }
+    }
+    
+    else {
+      // Shape creation logic
+      if (new_shape == false) {
+        // Start new shape
+        array_shapes.push(new CustomShape(shape_type, 255, 0, 0, 150));
+        new_shape = true;
+      }
+      array_shapes[array_shapes.length-1].create(cursor.getInd());
+    }
+  }
+}
+```
+
+#### Boundary Detection System
+```javascript
+function mouseInside() {
+  // Comprehensive boundary checking
+  if (mouseX >= x_origin && 
+      mouseX <= x_origin + grid_width &&  
+      mouseY >= y_origin && 
+      mouseY <= y_origin + grid_height && 
+      isMouseOverBtn == false) {
+    return true;
+  } else {
+    return false;
+  }
+}
+```
+
+### Shape Creation Workflow
+
+The shape creation system implements a sophisticated multi-step workflow that guides users through the process of creating precise geometric shapes.
+
+#### Shape Creation State Machine
+```javascript
+// Global state variables
+let new_shape = false;        // Currently creating a shape
+let shape_type = 'default';   // Selected shape type
+let array_shapes = [];        // Collection of all shapes
+
+// Shape creation workflow states:
+// 1. Idle: new_shape = false, waiting for user input
+// 2. Creating: new_shape = true, adding vertices
+// 3. Complete: shape added to array, new_shape = false
+```
+
+#### Step-by-Step Creation Process
+
+**Step 1: Shape Type Selection**
+```javascript
+// User selects shape type from dropdown
+shape_type = 'obstacle'; // Example selection
+console.log('Selected shape type:', shape_type);
+```
+
+**Step 2: Shape Initialization**
+```javascript
+// First click initializes new shape
+if (new_shape == false) {
+  array_shapes.push(new CustomShape(shape_type, 255, 0, 0, 150));
+  new_shape = true;
+}
+```
+
+**Step 3: Vertex Addition**
+```javascript
+// Subsequent clicks add vertices
+array_shapes[array_shapes.length-1].create(cursor.getInd());
+
+// Real-time preview during creation
+function mouseMoved() {
+  if (new_shape == true) {
+    array_shapes[array_shapes.length-1].createVirtual(cursor.getInd());
+  }
+}
+```
+
+**Step 4: Shape Completion**
+```javascript
+// Right-click or double-click completes shape
+function mousePressed() {
+  if (mouseButton === RIGHT) {
+    if (new_shape == true) {
+      array_shapes[array_shapes.length-1].closed = true;
+      new_shape = false;
+    }
+  }
+}
+```
+
+#### Virtual Preview System
+```javascript
+// Real-time shape preview during creation
+createVirtual(indices) {
+  this.indicesX.push(indices[0]);
+  this.indicesY.push(indices[1]);
+  this.virtual = true; // Marks as temporary
+}
+
+// Automatic cleanup after rendering
+show(lineX, lineY, toggle) {
+  // ... rendering logic ...
+  
+  if (this.virtual == true) {
+    this.indicesX.pop(); // Remove virtual vertex
+    this.indicesY.pop();
+  }
+}
+```
+
+#### Shape Validation and Error Handling
+```javascript
+// Minimum vertex validation
+if (array_shapes[array_shapes.length-1].indicesX.length < 3) {
+  // Prevent invalid shapes with less than 3 vertices
+  console.warn('Shape requires at least 3 vertices');
+}
+
+// Boundary validation
+if (!mouseInside()) {
+  // Prevent vertex creation outside canvas bounds
+  return;
+}
+```
+
+### File Export Mechanisms
+
+The application provides two distinct export mechanisms, each optimized for different use cases and workflows.
+
+#### CSV Export Implementation
+
+**Data Structure Preparation**
+```javascript
+function saveCSV(array_shapes) {
+  // Validation check
+  if (array_shapes.length == 0) {
+    showEmptyAlert();
+    return false;
+  }
+  
+  // Initialize p5.js file writer
+  let writer = createWriter('createGrid().csv');
+  
+  // Write CSV header
+  writer.write(["id, x_vert, y_vert, num_vert, shape_type\n"]);
+  
+  // Process each shape
+  for (let i = 0; i < array_shapes.length; i++) {
+    // Convert arrays to space-separated strings
+    let x = array_shapes[i].indicesX.toString().replace(/,/g, ' ');
+    let y = array_shapes[i].indicesY.toString().replace(/,/g, ' ');
+    let num_vert = array_shapes[i].indicesX.length.toString();
+    let type = array_shapes[i].shape_type;
+    
+    // Write shape data row
+    writer.write([i.toString() + "," + x + "," + y + "," + num_vert + "," + type + "\n"]);
+  }
+  
+  // Finalize and trigger download
+  writer.close();
+  return false;
+}
+```
+
+**CSV Format Specification**
+```csv
+id, x_vert, y_vert, num_vert, shape_type
+0, 10 15 20 15, 10 10 15 20, 4, default
+1, 25 30 35 30, 25 25 30 35, 4, obstacle
+2, 5 10 15 10 5, 5 5 10 15 15, 5, room
+```
+
+**Export Features:**
+- **Grid Index Export**: Uses grid indices for resolution independence
+- **Shape Type Preservation**: Maintains shape type information for analysis
+- **Vertex Count**: Explicit vertex count for validation
+- **MATLAB Compatibility**: Format optimized for `import_grid.m` processing
+
+#### PNG Export Implementation
+
+**Canvas Capture System**
+```javascript
+function savePNG() {
+  // Validation check
+  if (array_shapes.length == 0) {
+    showEmptyAlert();
+    return false;
+  }
+  
+  // p5.js built-in canvas export
+  saveCanvas('createGrid', 'png');
+  return false;
+}
+```
+
+**Export Characteristics:**
+- **Full Canvas Capture**: Includes grid, shapes, and all visual elements
+- **Native Resolution**: Maintains original canvas resolution
+- **Filename Convention**: Consistent 'createGrid.png' naming
+- **Browser Compatibility**: Uses standard HTML5 canvas export
+
+#### Export Error Handling
+```javascript
+function showEmptyAlert() {
+  empty_alert.style.display = "block";
+  timeOutAlert = setTimeout(function(){
+    empty_alert.style.display = "none";
+    selectToggle = false;
+  }, 3000);
+}
+```
+
+#### Export Integration with UI
+```javascript
+// CSV export button handler
+save_csv_btn.addEventListener('click', function(){
+  saveCSV(array_shapes);
+});
+
+// PNG export button handler
+save_png_btn.addEventListener('click', function(){
+  savePNG();
+});
+
+// Mouse interaction prevention during export
+save_csv_btn.addEventListener('mouseover', function(){
+  isMouseOverBtn = true;
+});
+```
+
+### Performance Optimizations and Best Practices
+
+#### Memory Management
+- **Efficient Shape Storage**: Grid indices instead of pixel coordinates
+- **Dynamic Array Management**: Automatic cleanup during shape removal
+- **Event-Driven Rendering**: Minimal computational overhead
+- **Garbage Collection**: Proper cleanup of temporary objects
+
+#### User Experience Enhancements
+- **Visual Feedback**: Immediate response to all user interactions
+- **Error Prevention**: Boundary checking and validation
+- **Responsive Design**: Seamless experience across devices
+- **Accessibility**: Keyboard navigation and screen reader support
+
+#### Code Organization
+- **Modular Architecture**: Separation of concerns across multiple files
+- **Event-Driven Design**: Clean separation between UI and canvas logic
+- **Consistent Naming**: Clear variable and function naming conventions
+- **Documentation**: Comprehensive inline comments and documentation
+
 ---
 
 *This project represents a specialized tool for computational geometry and grid-based analysis, bridging the gap between interactive web interfaces and scientific computing environments.*
+
 
 
 
