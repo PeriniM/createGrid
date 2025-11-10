@@ -716,8 +716,332 @@ The MATLAB integration enables various computational applications:
 - **Computational Geometry**: Shape analysis and processing
 - **Educational Tools**: Visualization for teaching computational methods
 
+## Technical Features Overview
+
+The createGrid application implements a sophisticated set of interactive features designed for precision grid-based shape creation and manipulation. The system combines real-time user interaction with computational geometry algorithms to provide a seamless drawing experience.
+
+### Interactive Canvas Drawing System
+
+The core drawing system is built on p5.js and provides a highly responsive, grid-constrained drawing environment.
+
+#### Canvas Architecture
+```javascript
+// Full-window responsive canvas
+createCanvas(windowWidth, windowHeight);
+background(255); // White background for optimal contrast
+
+// Dynamic grid overlay
+griglia = new Grid(0, 0, windowWidth, windowHeight, 100);
+griglia.show(150, 0.5); // Gray grid lines with minimal visual weight
+```
+
+**Key Characteristics:**
+- **Full-Screen Canvas**: Utilizes entire browser window for maximum drawing area
+- **Responsive Design**: Automatically adjusts to window resizing without data loss
+- **Grid Overlay**: Semi-transparent grid provides visual guidance without interference
+- **High DPI Support**: Crisp rendering on high-resolution displays
+- **Touch-Friendly**: Optimized for both mouse and touch interactions
+
+#### Real-Time Interaction System
+The drawing system provides immediate visual feedback through multiple interaction layers:
+
+**Cursor Tracking and Snapping**
+```javascript
+function mouseMoved() {
+  cursor.snap(mouseX, mouseY, griglia.lineY, griglia.lineX);
+  refreshCanvas();
+  
+  // Show virtual preview during shape creation
+  if (new_shape == true) {
+    array_shapes[array_shapes.length-1].createVirtual(cursor.getInd());
+  }
+}
+```
+
+**Multi-Mode Visual Feedback**
+- **Add Mode**: Teal cursor (`#1abc9c`) indicates shape creation mode
+- **Remove Mode**: Red cursor (`#ff0000`) highlights shapes for deletion
+- **Select Mode**: Purple cursor (`#9370DB`) enables shape modification
+- **Virtual Preview**: Real-time shape preview during creation
+
+### Grid-Based Coordinate Snapping
+
+The snapping system ensures all user interactions align perfectly with grid intersections, providing precision and consistency in shape creation.
+
+#### Snapping Algorithm Implementation
+```javascript
+snap(x, y, lineY, lineX) {
+  let sideLength = lineY[1] - lineY[0];
+  
+  // X-axis snapping with tolerance-based detection
+  for (let i = 0; i < lineX.length; i++) {
+    let d = lineX[i] - x;
+    if (abs(d) <= sideLength / 2) {
+      this.x = lineX[i];
+      this.indX = i;
+      break;
+    }
+  }
+  
+  // Y-axis snapping with identical logic
+  // ... similar implementation for Y coordinates
+}
+```
+
+**Technical Specifications:**
+- **Snap Tolerance**: `sideLength / 2` provides optimal user experience
+- **Dual Coordinate System**: Maintains both pixel coordinates and grid indices
+- **Boundary Detection**: Only snaps when cursor is within canvas bounds
+- **Performance Optimized**: Efficient nearest-neighbor search algorithm
+
+#### Grid Configuration System
+```javascript
+// Configurable grid parameters
+this.suddx = 100;  // Horizontal subdivisions (default)
+this.maxSuddx = 50; // Maximum subdivision limit
+this.minSuddx = 10; // Minimum subdivision limit
+this.sideLength = this.w / this.suddx; // Dynamic cell size calculation
+```
+
+**Grid Features:**
+- **Dynamic Subdivision**: Adjustable grid density (10-50 subdivisions)
+- **Aspect Ratio Preservation**: Maintains square cells regardless of canvas dimensions
+- **Automatic Scaling**: Grid scales with canvas resizing
+- **Memory Efficient**: Grid lines stored as coordinate arrays
+
+### Multiple Shape Types System
+
+The application supports eight distinct shape types, each designed for specific use cases in computational geometry and robotics applications.
+
+#### Shape Type Categories
+
+**1. Default Shapes**
+- **Purpose**: General-purpose geometric shapes
+- **Color**: User-customizable via color picker
+- **Applications**: Basic geometric analysis, educational demonstrations
+
+**2. Room Shapes**
+- **Purpose**: Architectural and spatial planning elements
+- **Typical Use**: Floor plans, room layouts, building design
+- **Integration**: Compatible with CAD workflow export
+
+**3. Obstacle Shapes**
+- **Purpose**: Barriers and obstructions in path planning
+- **Applications**: Robot navigation, collision avoidance algorithms
+- **Visualization**: Typically rendered with warning colors
+
+**4. Agent Shapes**
+- **Purpose**: Mobile entities and dynamic objects
+- **Applications**: Multi-agent systems, swarm robotics
+- **Characteristics**: Often represent moving elements in simulations
+
+**5. UWB Anchor Shapes**
+- **Purpose**: Ultra-Wideband positioning system anchors
+- **Applications**: Indoor localization systems, RTLS (Real-Time Location Systems)
+- **Technical Context**: Fixed reference points for triangulation
+
+**6. UWB Sensor Shapes**
+- **Purpose**: Ultra-Wideband mobile sensors and tags
+- **Applications**: Asset tracking, personnel monitoring
+- **Integration**: Works with UWB anchor systems
+
+**7. Stereo Camera Shapes**
+- **Purpose**: Vision sensor placement and coverage analysis
+- **Applications**: Computer vision systems, surveillance planning
+- **Characteristics**: Often includes field-of-view considerations
+
+**8. LiDAR Shapes**
+- **Purpose**: Laser range finder sensor placement
+- **Applications**: Autonomous vehicles, 3D mapping systems
+- **Technical Context**: Point cloud generation and obstacle detection
+
+#### Shape Type Implementation
+```javascript
+// Shape type selection system
+let shape_type = 'default'; // Global shape type state
+
+// Type-specific event handlers
+default_shape_btn.addEventListener('click', function(){
+  shape_type = 'default';
+});
+
+obstacle_shape_btn.addEventListener('click', function(){
+  shape_type = 'obstacle';
+});
+
+// Shape creation with type assignment
+new_shape = new CustomShape(shape_type, red, green, blue, alpha);
+```
+
+**Shape Management Features:**
+- **Type Persistence**: Shape type maintained throughout creation process
+- **Visual Differentiation**: Each type can have distinct visual properties
+- **Export Integration**: Shape types included in CSV export for analysis
+- **Extensible Architecture**: Easy addition of new shape types
+
+### Color Picker Integration
+
+The application includes a sophisticated color management system that allows users to customize shape appearance with real-time preview capabilities.
+
+#### Color Picker Implementation
+```javascript
+// p5.js color picker widget
+colorPicker = createColorPicker('#ff0000'); // Default red
+colorPicker.position(width/2, height/2);
+colorPicker.style('display', 'none'); // Initially hidden
+
+// Color application system
+function applyColorToShape(shape, color) {
+  let rgba = color.levels; // Extract RGBA values
+  shape.changeColor([rgba[0], rgba[1], rgba[2], rgba[3]]);
+}
+```
+
+**Color System Features:**
+- **HTML5 Color Picker**: Native browser color selection interface
+- **RGBA Support**: Full alpha channel support for transparency effects
+- **Real-Time Preview**: Immediate visual feedback during color selection
+- **Shape-Specific Colors**: Each shape maintains independent color properties
+- **Default Color Palette**: Sensible defaults for different shape types
+
+#### Color Management Workflow
+1. **Shape Selection**: User selects existing shape using Select mode
+2. **Color Picker Activation**: Color picker widget becomes visible
+3. **Color Selection**: User chooses color using native browser interface
+4. **Real-Time Application**: Color immediately applied to selected shape
+5. **Persistence**: Color information stored with shape data
+
+### CSV Export Functionality
+
+The CSV export system provides comprehensive data extraction for integration with external analysis tools, particularly MATLAB.
+
+#### Export Data Structure
+```csv
+id, x_vert, y_vert, num_vert, shape_type
+0, 10 15 20 15, 10 10 15 20, 4, default
+1, 25 30 30 25, 25 25 30 30, 4, obstacle
+```
+
+**CSV Format Specifications:**
+- **ID Field**: Sequential shape identifier
+- **X Vertices**: Space-separated grid indices for X coordinates
+- **Y Vertices**: Space-separated grid indices for Y coordinates  
+- **Vertex Count**: Number of vertices in the shape
+- **Shape Type**: String identifier for shape category
+
+#### Export Implementation
+```javascript
+function saveCSV(array_shapes) {
+  let writer = createWriter('createGrid().csv');
+  writer.write(["id, x_vert, y_vert, num_vert, shape_type\n"]);
+  
+  for (let i = 0; i < array_shapes.length; i++) {
+    let x = array_shapes[i].indicesX.toString().replace(/,/g, ' ');
+    let y = array_shapes[i].indicesY.toString().replace(/,/g, ' ');
+    let num_vert = array_shapes[i].indicesX.length.toString();
+    let type = array_shapes[i].shape_type;
+    
+    writer.write([i + "," + x + "," + y + "," + num_vert + "," + type + "\n"]);
+  }
+  writer.close();
+}
+```
+
+**Export Features:**
+- **Grid Index Export**: Exports grid indices rather than pixel coordinates
+- **Resolution Independence**: Data remains valid across different screen sizes
+- **MATLAB Compatibility**: Format optimized for MATLAB import functions
+- **Batch Processing**: All shapes exported in single file
+- **Error Handling**: Validates data before export
+
+#### Integration with MATLAB Workflow
+The CSV export is specifically designed to integrate with the MATLAB processing pipeline:
+
+1. **Web Export**: User creates shapes and exports CSV
+2. **MATLAB Import**: `import_grid.m` reads and processes CSV data
+3. **Normalization**: Coordinates normalized to [0,1] range
+4. **Grid Generation**: Shapes replicated across finite element grid
+5. **Analysis**: FEM/VEM analysis performed on generated mesh
+
+### PNG Export Capabilities
+
+The PNG export system provides high-quality visual documentation and sharing capabilities.
+
+#### PNG Export Implementation
+```javascript
+function savePNG() {
+  if (array_shapes.length == 0) {
+    // Show empty alert if no shapes exist
+    showEmptyAlert();
+  } else {
+    saveCanvas('createGrid', 'png'); // p5.js built-in function
+  }
+}
+```
+
+**PNG Export Features:**
+- **Full Canvas Capture**: Exports entire canvas including grid and shapes
+- **High Resolution**: Maintains original canvas resolution
+- **Transparent Background**: Optional background transparency
+- **Shape Preservation**: All visual elements included in export
+- **Filename Convention**: Consistent naming for easy file management
+
+#### Visual Documentation Workflow
+1. **Shape Creation**: User creates desired shapes on grid
+2. **Visual Optimization**: Adjust colors and layout for documentation
+3. **PNG Export**: Generate high-quality image file
+4. **Documentation Integration**: Use exported images in reports, presentations
+5. **Version Control**: Maintain visual history of design iterations
+
+### Advanced Interaction Features
+
+#### Multi-Modal Operation System
+The application supports three distinct operational modes:
+
+**Add Mode (Default)**
+- **Activation**: Click "Add" button or select shape type
+- **Behavior**: Click to add vertices, right-click to complete shape
+- **Visual Feedback**: Teal cursor, virtual shape preview
+- **State Management**: `new_shape` flag tracks creation state
+
+**Remove Mode**
+- **Activation**: Click "Remove" button
+- **Behavior**: Click on shapes to delete them
+- **Visual Feedback**: Red cursor, red shape highlighting
+- **Safety Features**: Confirmation through visual highlighting
+
+**Select Mode**
+- **Activation**: Click "Select" button
+- **Behavior**: Click on shapes to modify properties
+- **Visual Feedback**: Purple cursor, semi-transparent highlighting
+- **Integration**: Activates color picker for selected shapes
+
+#### Error Handling and User Feedback
+```javascript
+// Empty canvas validation
+if (array_shapes.length == 0) {
+  empty_alert.style.display = "block";
+  setTimeout(function(){
+    empty_alert.style.display = "none";
+  }, 3000);
+}
+```
+
+**User Feedback Systems:**
+- **Empty Canvas Alerts**: Warns users when attempting operations on empty canvas
+- **Mode Indicators**: Visual cursor changes indicate current operational mode
+- **Shape Highlighting**: Real-time feedback during shape interaction
+- **Timeout Management**: Automatic alert dismissal for better UX
+
+#### Performance Optimizations
+- **Event-Driven Rendering**: Only redraws when necessary
+- **Efficient Shape Storage**: Grid indices minimize memory usage
+- **Optimized Collision Detection**: Fast point-in-polygon algorithms
+- **Responsive Grid Updates**: Minimal computational overhead during resize
+
 ---
 
 *This project represents a specialized tool for computational geometry and grid-based analysis, bridging the gap between interactive web interfaces and scientific computing environments.*
+
 
 
