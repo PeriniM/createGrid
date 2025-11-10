@@ -484,7 +484,240 @@ The sketch.js file works closely with dom-events.js to provide seamless UI inter
 - Automatic cleanup during shape removal
 - Responsive grid updates without memory leaks
 
+## MATLAB Integration Component
+
+The MATLAB integration provides powerful post-processing capabilities for grid data exported from the web application. The system consists of three specialized scripts that handle CSV import, grid normalization, visualization, and advanced path planning functionality.
+
+### import_grid.m - CSV Processing and Grid Normalization
+
+The `import_grid.m` script serves as the primary interface between the web application and MATLAB's computational environment, handling CSV import, coordinate normalization, and grid generation.
+
+#### Core Functionality
+
+**CSV Import and Parsing**
+```matlab
+T = readtable('star.csv', 'ReadVariableNames',false, 'Delimiter',',', 'HeaderLines',1, 'TreatAsEmpty',{'NA','na'});
+```
+- Reads CSV files exported from the web application
+- Handles variable column counts for different shape complexities
+- Processes grid indices and converts them to coordinate arrays
+- Supports multiple shapes per CSV file
+
+**Coordinate System Processing**
+The script processes coordinates using a sophisticated parsing system:
+```matlab
+x = str2num(string(T{i,2:3:end}));  % Extract X coordinates
+y = str2num(string(T{i,3:3:end}))*-1;  % Extract Y coordinates (inverted)
+```
+- Extracts X coordinates from every 3rd column starting at column 2
+- Extracts Y coordinates from every 3rd column starting at column 3
+- Applies Y-axis inversion to match MATLAB's coordinate system
+- Stores coordinates in cell arrays for flexible shape handling
+
+**Normalization Algorithm**
+The script implements a comprehensive normalization system:
+```matlab
+% Find global bounds across all shapes
+x_max, y_max, x_min, y_min = findGlobalBounds(shapes);
+
+% Normalize to [0,1] range
+shape{i,j} = (shape{i,j} - min_val)/(max_val - min_val);
+```
+- Calculates global bounding box across all imported shapes
+- Normalizes coordinates to [0,1] range for both axes
+- Maintains aspect ratio and relative positioning
+- Enables scale-independent analysis
+
+**Grid Generation System**
+```matlab
+suddx = 5; % Number of columns
+suddy = 5; % Number of rows
+dx = f1/suddx; dy = f2/suddy; % Cell dimensions
+```
+- Creates configurable grid subdivisions (default 5x5)
+- Generates element-wise coordinate arrays
+- Supports both square and rectangular grid configurations
+- Scales normalized shapes to fit grid cells
+
+**Finite Element Mesh Creation**
+The script generates finite element mesh structures:
+- **Element Arrays**: `elem_x{}, elem_y{}` store coordinates for each element
+- **Node Coordination**: Builds global node coordinate arrays
+- **Boundary Detection**: Identifies boundary nodes for FEM analysis
+- **Element Connectivity**: Maintains element-to-node relationships
+
+#### Visualization Capabilities
+- **Shape Preview**: Plots normalized shapes with element numbering
+- **Grid Visualization**: Displays generated finite element mesh
+- **Boundary Highlighting**: Shows boundary nodes and elements
+- **Element Numbering**: Optional element and node labeling
+
+#### Output Data Structures
+```matlab
+griglia.elements = indelem;           % Total number of elements
+griglia.vertices = [xvert; yvert];    % Node coordinates
+griglia.bordo = b(:);                 % Boundary node indices
+griglia.dirichlet = b(:);             % Dirichlet boundary conditions
+```
+
+### pathplanning.m - Trajectory Generation and Animation
+
+The `pathplanning.m` script provides advanced trajectory generation, spline interpolation, and animated visualization capabilities for mobile robot path planning applications.
+
+#### Trajectory Generation System
+
+**Spline-Based Path Interpolation**
+```matlab
+% Create smooth trajectory using spline interpolation
+x2 = spline(t, x, t2);  % X-coordinate trajectory
+y2 = spline(t, y, t2);  % Y-coordinate trajectory
+```
+- Uses MATLAB's spline function for smooth trajectory generation
+- Interpolates between waypoints with C² continuity
+- Supports custom time parameterization
+- Generates high-resolution trajectory points
+
+**Waypoint Management**
+```matlab
+pos_xy = [shape{1,1}(1,:); shape{1,2}(1,:)]; % Extract waypoints
+t = [0:numel(pos_xy)/2-1];  % Time vector
+```
+- Extracts waypoints from imported shape data
+- Creates time-parameterized trajectory
+- Supports variable waypoint spacing
+- Handles both open and closed path configurations
+
+**Kinematic Analysis**
+The script performs comprehensive kinematic analysis:
+```matlab
+vx2 = [0 diff(x2)];  % X-velocity profile
+vy2 = [0 diff(y2)];  % Y-velocity profile
+ax2 = [0 diff(vx2)]; % X-acceleration profile
+ay2 = [0 diff(vy2)]; % Y-acceleration profile
+```
+- Computes velocity profiles using numerical differentiation
+- Calculates acceleration profiles for motion analysis
+- Provides separate X and Y component analysis
+- Enables dynamic feasibility assessment
+
+#### Animation System
+
+**Real-Time Trajectory Animation**
+```matlab
+for i = 2:length(x2)
+    set(unicycle, 'XData', x2(i), 'YData', y2(i));
+    drawnow;
+    pause((t2t(i)-t2t(i-1))/100);
+    exportgraphics(gcf,'testAnimated.gif','Append',true);
+end
+```
+- Animates mobile robot following the generated trajectory
+- Real-time visualization with configurable speed
+- Automatic GIF generation for documentation
+- Smooth motion interpolation between waypoints
+
+**Visualization Features**
+- **Multi-Figure Layout**: Separate plots for position, velocity, and acceleration
+- **Trajectory Overlay**: Shows complete path with waypoint markers
+- **Real-Time Updates**: Dynamic robot position updates
+- **Export Capabilities**: Automatic GIF generation for presentations
+
+#### Advanced Features
+- **Wheeled Mobile Robot (WMR) Modeling**: Specialized for differential drive robots
+- **Time Optimization**: Configurable trajectory timing
+- **Multi-Axis Analysis**: Separate X/Y component visualization
+- **Export Integration**: Direct GIF output for documentation
+
+### enum_nodes.m - Node Enumeration Utility
+
+The `enum_nodes.m` function provides sophisticated node enumeration and duplicate removal for finite element mesh generation.
+
+#### Function Signature
+```matlab
+function [xvert, yvert, elem] = enum_nodes(nodi_x, nodi_y, elem_x, elem_y, elem)
+```
+
+#### Core Algorithm
+
+**Unique Node Detection**
+```matlab
+linee_x = uniquetol(nodi_x);  % Unique X coordinates (ascending)
+linee_y = fliplr(uniquetol(nodi_y));  % Unique Y coordinates (descending)
+```
+- Uses tolerance-based uniqueness detection (`uniquetol`)
+- Handles floating-point precision issues
+- Maintains coordinate ordering for consistent numbering
+- Supports both X and Y coordinate processing
+
+**Duplicate Node Elimination**
+The algorithm implements sophisticated duplicate detection:
+```matlab
+if find(ismember(nodi_unici,[find(ind_pos_x==1) find(ind_pos_y==1)],'rows'))
+    % Reuse existing node index
+    count_nodi_unici(end+1) = count_nodi_unici(index(1));
+    count_nodi_globali = count_nodi_globali - 1;
+else
+    % Create new node
+    count_nodi_unici(end+1) = count_nodi_globali;
+    xvert(end+1) = linee_x(ind_pos_x);
+    yvert(end+1) = linee_y(ind_pos_y);
+end
+```
+- Identifies nodes with identical coordinates within tolerance
+- Maintains consistent node numbering across elements
+- Reduces memory usage by eliminating redundant nodes
+- Updates element connectivity arrays automatically
+
+**Element Connectivity Management**
+```matlab
+elem{s,:}(1,k) = count_nodi_unici(end);  % Update element connectivity
+```
+- Updates element-to-node connectivity arrays
+- Maintains referential integrity after node merging
+- Supports variable element sizes and shapes
+- Preserves topological relationships
+
+#### Performance Optimizations
+- **Tolerance-Based Comparison**: Handles floating-point precision issues
+- **Memory Efficient**: Eliminates duplicate coordinate storage
+- **Vectorized Operations**: Uses MATLAB's optimized array operations
+- **Incremental Processing**: Processes elements sequentially for memory efficiency
+
+#### Output Data Structures
+- **`xvert, yvert`**: Arrays of unique node coordinates
+- **`elem`**: Updated element connectivity arrays with correct node indices
+- **Consistent Numbering**: Global node numbering system for FEM analysis
+
+### Integration Workflow
+
+The three MATLAB scripts work together in a coordinated workflow:
+
+1. **Data Import**: `import_grid.m` processes CSV files from the web application
+2. **Mesh Generation**: Creates finite element mesh with proper node enumeration
+3. **Node Processing**: `enum_nodes.m` eliminates duplicates and creates connectivity
+4. **Visualization**: Displays normalized grids and finite element meshes
+5. **Path Planning**: `pathplanning.m` generates trajectories for mobile robot applications
+6. **Animation**: Creates animated visualizations and exports documentation
+
+### Sample Data Files
+
+The system includes sample CSV files in the `shapes_csv/` directory:
+- **`star.csv`**: Complex star-shaped geometry for testing
+- **`shield.csv`**: Shield-shaped pattern for validation
+- **`path1.csv`, `path2.csv`**: Simple path configurations
+- **`random.csv`**: Random shape for algorithm testing
+
+### Applications
+
+The MATLAB integration enables various computational applications:
+- **Finite Element Analysis**: Grid generation for FEM simulations
+- **Virtual Element Methods**: Mesh creation for VEM algorithms
+- **Path Planning**: Mobile robot trajectory optimization
+- **Computational Geometry**: Shape analysis and processing
+- **Educational Tools**: Visualization for teaching computational methods
+
 ---
 
 *This project represents a specialized tool for computational geometry and grid-based analysis, bridging the gap between interactive web interfaces and scientific computing environments.*
+
 
